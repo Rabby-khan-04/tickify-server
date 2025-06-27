@@ -6,6 +6,7 @@ const userSchema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     role: { type: String, default: "user" },
+    refreshToken: { type: String, select: false },
     favorites: {
       type: [{ type: Schema.Types.ObjectId, ref: "Movie" }],
       default: [],

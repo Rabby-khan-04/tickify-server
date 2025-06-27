@@ -3,6 +3,8 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import User from "../models/user.model.js";
 import ApiResponce from "../utils/ApiResponse.js";
+import { cookieOptions } from "../constants.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -76,12 +78,14 @@ const issueJWT = asyncHandler(async (req, res) => {
 
     if (!user) throw new ApiError(status.UNAUTHORIZED, "Invalid email!!");
 
-    const { accessToken, refreshToken } = generateAccessAndRefreshToken(
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id
     );
 
     res
       .status(status.OK)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
       .json(
         new ApiResponce(
           status.OK,
@@ -101,6 +105,52 @@ const issueJWT = asyncHandler(async (req, res) => {
   }
 });
 
-const UserController = { registerUser, issueJWT };
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken ||
+    req.header("Authorization").replace("Bearer ", "");
+  if (!incomingRefreshToken)
+    throw new ApiError(status.UNAUTHORIZED, "Unauthorized request!!");
+
+  const decodedToken = jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+  try {
+    const user = await User.findById(decodedToken._id).select("+refreshToken");
+
+    if (!user) throw new ApiError(status.UNAUTHORIZED, "Invalid token!!");
+
+    if (incomingRefreshToken !== user.refreshToken)
+      throw new ApiError(401, "Refresh token is expired or used!!");
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
+
+    res
+      .status(status.OK)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
+      .json(
+        new ApiResponce(
+          status.OK,
+          { accessToken, refreshToken },
+          "Access token refreshed!!"
+        )
+      );
+  } catch (error) {
+    console.log(`Access token refreshing ERROR: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while refreshing access token!!"
+    );
+  }
+});
+
+const UserController = { registerUser, issueJWT, refreshAccessToken };
 
 export default UserController;

@@ -4,5 +4,7 @@ import UserController from "../controllers/user.controller.js";
 const router = Router();
 
 router.route("/register").post(UserController.registerUser);
+router.route("/jwt").post(UserController.issueJWT);
+router.route("/refresh-access-token").post(UserController.refreshAccessToken);
 
 export default router;
