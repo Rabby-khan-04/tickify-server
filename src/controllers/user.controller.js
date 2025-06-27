@@ -151,6 +151,51 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-const UserController = { registerUser, issueJWT, refreshAccessToken };
+const logoutUser = asyncHandler(async (req, res) => {
+  try {
+    const incomingRefreshToken =
+      req?.cookies?.refreshToken || req?.body?.refreshToken;
+
+    if (!incomingRefreshToken)
+      throw new ApiError(status.UNAUTHORIZED, "Unauthorized Access!!");
+
+    const decoded = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const user = await User.findById(decoded._id).select("+refreshToken");
+
+    if (!user || incomingRefreshToken !== user.refreshToken)
+      throw new ApiError(
+        status.UNAUTHORIZED,
+        "Invalid or expired refresh token!!"
+      );
+
+    await User.findByIdAndUpdate(user._id, { $unset: { refreshToken: 1 } });
+
+    res
+      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("refreshToken", cookieOptions)
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, {}, "User logged out successfully!!"));
+  } catch (error) {
+    console.log(`Logout Error: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while logging out user!!"
+    );
+  }
+});
+
+const UserController = {
+  registerUser,
+  issueJWT,
+  refreshAccessToken,
+  logoutUser,
+};
 
 export default UserController;
