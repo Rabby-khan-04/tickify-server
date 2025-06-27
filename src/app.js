@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import globalErrorHandler from "./utils/globalErrorHandler.js";
+
 const app = express();
 
 // middleware
@@ -23,17 +25,23 @@ import screenRouter from "./routes/screen.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 import movieRouter from "./routes/movie.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
+import authRouter from "./routes/auth.routes.js";
 
-app.use("/", (req, res) => {
-  res.send(`Tckify Server is running!!`);
-});
+// app.use("/", (req, res) => {
+//   res.send(`Tckify Server is running!!`);
+// });
 
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/theater", theaterRouter);
-app.use("/api/v1/showtime", showtimeRouter);
-app.use("/api/v1/screen", screenRouter);
-app.use("/api/v1/payment", paymentRouter);
-app.use("/api/v1/movie", movieRouter);
-app.use("/api/v1/booking", bookingRouter);
+// Router uses
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/theaters", theaterRouter);
+app.use("/api/v1/showtimes", showtimeRouter);
+app.use("/api/v1/screens", screenRouter);
+app.use("/api/v1/payments", paymentRouter);
+app.use("/api/v1/movies", movieRouter);
+app.use("/api/v1/bookings", bookingRouter);
+
+// Global error handler
+app.use(globalErrorHandler);
 
 export default app;
