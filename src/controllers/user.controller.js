@@ -47,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const user = await newUser.save();
 
-    res
+    return res
       .status(status.CREATED)
       .json(
         new ApiResponce(status.CREATED, user, "User registered successfully!!")
@@ -82,7 +82,7 @@ const issueJWT = asyncHandler(async (req, res) => {
       user._id
     );
 
-    res
+    return res
       .status(status.OK)
       .cookie("accessToken", accessToken, cookieOptions)
       .cookie("refreshToken", refreshToken, cookieOptions)
@@ -128,7 +128,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       user._id
     );
 
-    res
+    return res
       .status(status.OK)
       .cookie("accessToken", accessToken, cookieOptions)
       .cookie("refreshToken", refreshToken, cookieOptions)
@@ -174,7 +174,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     await User.findByIdAndUpdate(user._id, { $unset: { refreshToken: 1 } });
 
-    res
+    return res
       .clearCookie("accessToken", cookieOptions)
       .clearCookie("refreshToken", cookieOptions)
       .status(status.OK)

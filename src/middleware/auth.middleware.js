@@ -44,6 +44,15 @@ const verifyJwt = asyncHandler(async (req, _, next) => {
   }
 });
 
-const AuthMiddleware = { verifyJwt };
+const verifyAdmin = asyncHandler(async (req, _, next) => {
+  const { role } = req.user;
+
+  if (role === "admin") {
+    return next();
+  }
+  throw new ApiError(status.FORBIDDEN, "Unauthorized Access!!!");
+});
+
+const AuthMiddleware = { verifyJwt, verifyAdmin };
 
 export default AuthMiddleware;
