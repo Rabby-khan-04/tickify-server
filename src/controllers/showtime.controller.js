@@ -63,7 +63,7 @@ const addShow = asyncHandler(async (req, res) => {
     });
 
     const showData = {
-      movieId: movie._id,
+      movie: movie._id,
       theaters,
     };
 
@@ -90,6 +90,28 @@ const addShow = asyncHandler(async (req, res) => {
   }
 });
 
-const ShowtimeController = { addShow };
+const getAllShows = asyncHandler(async (req, res) => {
+  try {
+    const shows = await Showtime.find()
+      .populate({ path: "movie", select: "-casts" })
+      .populate("theaters.theaterId")
+      .lean();
+
+    return res
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, shows, "Shows fetched successfully!!"));
+  } catch (error) {
+    console.log(`ERROR in get all show: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching all shows!!"
+    );
+  }
+});
+
+const ShowtimeController = { addShow, getAllShows };
 
 export default ShowtimeController;

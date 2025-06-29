@@ -12,4 +12,12 @@ router
     ShowtimeController.addShow
   );
 
+router
+  .route("/")
+  .get(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyAdmin,
+    ShowtimeController.getAllShows
+  );
+
 export default router;

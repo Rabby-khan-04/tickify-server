@@ -2,9 +2,10 @@ import mongoose, { Schema } from "mongoose";
 
 const showtimeSchema = new Schema(
   {
-    movieId: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
+    movie: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
     theaters: [
       {
+        _id: false,
         theaterId: {
           type: Schema.Types.ObjectId,
           ref: "Theater",
@@ -12,6 +13,7 @@ const showtimeSchema = new Schema(
         },
         dates: [
           {
+            _id: false,
             date: { type: String, required: true },
             showtimes: [Date],
           },
@@ -22,6 +24,16 @@ const showtimeSchema = new Schema(
   },
   { versionKey: false }
 );
+
+// showtimeSchema.virtual("movie", {
+//   ref: "Movie",
+//   localField: "movieId",
+//   foreignField: "_id",
+//   justOne: true,
+// });
+
+// showtimeSchema.set("toObject", { virtuals: true });
+// showtimeSchema.set("toJSON", { virtuals: true });
 
 const Showtime = mongoose.model("Showtime", showtimeSchema);
 
