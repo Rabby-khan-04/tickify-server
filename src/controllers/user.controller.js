@@ -191,11 +191,33 @@ const logoutUser = asyncHandler(async (req, res) => {
   }
 });
 
+const getAUser = asyncHandler(async (req, res) => {
+  try {
+    const user = req.user;
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(status.OK, user, "User info fetched successfully!!")
+      );
+  } catch (error) {
+    console.log(`Getting User info ERROR: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while getting user info!!"
+    );
+  }
+});
+
 const UserController = {
   registerUser,
   issueJWT,
   refreshAccessToken,
   logoutUser,
+  getAUser,
 };
 
 export default UserController;

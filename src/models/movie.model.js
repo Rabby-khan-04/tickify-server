@@ -2,19 +2,20 @@ import mongoose, { Schema } from "mongoose";
 
 const movieSchema = new Schema(
   {
-    title: { tyep: String, required: true },
-    overview: { tyep: String, required: true },
-    poster_path: { tyep: String, required: true },
-    backdrop_path: { tyep: String, required: true },
+    movieId: { type: Number, required: true },
+    title: { type: String, required: true },
+    overview: { type: String, required: true },
+    poster_path: { type: String, required: true },
+    backdrop_path: { type: String, required: true },
     genres: { type: [{ id: String, name: String }], default: [] },
     casts: { type: [Object], default: [] },
-    release_date: { tyep: String, required: true },
-    original_language: { tyep: String, required: true },
-    popularity: { tyep: Number, required: true },
-    tagline: { tyep: String, required: true },
-    runtime: { tyep: Number, required: true },
-    vote_average: { tyep: Number, required: true },
-    adult: { tyep: Boolean, required: true },
+    release_date: { type: String, required: true },
+    original_language: { type: String, required: true },
+    popularity: { type: Number, required: true },
+    tagline: { type: String, required: true },
+    runtime: { type: Number, required: true },
+    vote_average: { type: Number, required: true },
+    adult: { type: Boolean, required: true },
   },
   { versionKey: false }
 );
