@@ -18,5 +18,12 @@ router
     AuthMiddleware.verifyAdmin,
     TheaterController.getAllTheaters
   );
+router
+  .route("/:theaterId")
+  .delete(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyAdmin,
+    TheaterController.deleteTheater
+  );
 
 export default router;

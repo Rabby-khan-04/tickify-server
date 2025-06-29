@@ -61,6 +61,30 @@ const getAllTheaters = asyncHandler(async (req, res) => {
   }
 });
 
-const TheaterController = { addTheater, getAllTheaters };
+const deleteTheater = asyncHandler(async (req, res) => {
+  try {
+    const { theaterId } = req.params;
+
+    const theater = await Theater.findByIdAndDelete(theaterId);
+
+    if (!theater)
+      throw new ApiError(status.NOT_FOUND, "Theater does not exist!!");
+
+    res
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, {}, "Theater deleted successfully"));
+  } catch (error) {
+    console.log(`Theater deletion ERROR: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while deleting theater!!"
+    );
+  }
+});
+
+const TheaterController = { addTheater, getAllTheaters, deleteTheater };
 
 export default TheaterController;
