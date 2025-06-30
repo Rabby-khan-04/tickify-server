@@ -67,13 +67,44 @@ const addShow = asyncHandler(async (req, res) => {
       theaters,
     };
 
-    const show = await Showtime.create(showData);
+    let show = await Showtime.findOne({ movie: movie._id });
 
-    if (!show)
-      throw new ApiError(
-        status.INTERNAL_SERVER_ERROR,
-        "Something went wrong while adding a showtime!!"
-      );
+    if (!show) {
+      show = await Showtime.create(showData);
+    } else {
+      theaters.forEach((incomingTheater) => {
+        const existingTheater = show.theaters.find(
+          (savedTheater) =>
+            savedTheater.theaterId.toString() === incomingTheater.theaterId
+        );
+
+        if (existingTheater) {
+          incomingTheater.dates.forEach((incomingDate) => {
+            const existingDate = existingTheater.dates.find(
+              (savedDate) => savedDate.date === incomingDate.date
+            );
+
+            if (existingDate) {
+              incomingDate.showtimes.forEach((newShowTime) => {
+                const timeAlredyExists = existingDate.showtimes.some(
+                  (savedTime) => savedTime.time.getTime() === newShowTime.time
+                );
+
+                if (!timeAlredyExists) {
+                  existingDate.showtimes.push(newShowTime);
+                }
+              });
+            } else {
+              existingTheater.dates.push(incomingDate);
+            }
+          });
+        } else {
+          show.theaters.push(incomingTheater);
+        }
+      });
+
+      await show.save();
+    }
 
     return res
       .status(status.CREATED)
