@@ -56,9 +56,9 @@ const addShow = asyncHandler(async (req, res) => {
 
     theaters.forEach((theater) => {
       theater.dates.forEach((dateTiem) => {
-        dateTiem.showtimes = dateTiem.showtimes.map(
-          (time) => new Date(`${dateTiem.date}T${time}`)
-        );
+        dateTiem.showtimes = dateTiem.showtimes.map((time) => ({
+          time: new Date(`${dateTiem.date}T${time}`),
+        }));
       });
     });
 
@@ -122,42 +122,13 @@ const getUpcomingShow = asyncHandler(async (req, res) => {
       })
       .populate("theaters.theaterId");
 
-    // const shows = rawShows
-    //   .map((show) => {
-    //     const cleanTheater = show.theaters
-    //       .map((theater) => {
-    //         const cleanedDate = theater.dates
-    //           .map((dateObj) => {
-    //             const futureShowTimes = dateObj.showtimes.filter(
-    //               (dateTime) => dateTime > now
-    //             );
-
-    //             const dateObjPlain = dateObj.toObject();
-
-    //             return futureShowTimes.length > 0
-    //               ? { ...dateObjPlain, showtimes: futureShowTimes }
-    //               : null;
-    //           })
-    //           .filter(Boolean);
-
-    //         const theaterPlainObj = theater.toObject();
-
-    //         return cleanedDate.length > 0
-    //           ? { ...theaterPlainObj, dates: cleanedDate }
-    //           : null;
-    //       })
-    //       .filter(Boolean);
-
-    //     const showPlainObj = show.toObject();
-
-    //     return { ...showPlainObj, theaters: cleanTheater };
-    //   })
-    //   .filter((show) => show.theaters.length > 0);
+    if (rawShows.length < 1)
+      throw new ApiError(status.NOT_FOUND, "There is no upcoming show!!");
 
     const shows = rawShows.filter((show) =>
       show.theaters.some((theater) =>
         theater.dates.some((dateObj) =>
-          dateObj.showtimes.some((time) => time > now)
+          dateObj.showtimes.some((timeObj) => timeObj.time > now)
         )
       )
     );
@@ -196,7 +167,9 @@ const getAShow = asyncHandler(async (req, res) => {
       .map((theater) => {
         const cleanedDates = theater.dates
           .map((dateObj) => {
-            const futureTimes = dateObj.showtimes.filter((time) => time > now);
+            const futureTimes = dateObj.showtimes.filter(
+              (time) => time.time > now
+            );
 
             const plainDateObj = dateObj.toObject();
 

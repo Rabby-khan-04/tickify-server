@@ -15,12 +15,17 @@ const showtimeSchema = new Schema(
           {
             _id: false,
             date: { type: String, required: true },
-            showtimes: [Date],
+            showtimes: [
+              {
+                _id: false,
+                time: { type: Date, required: true },
+                bookedSeats: { type: [String], default: [] },
+              },
+            ],
           },
         ],
       },
     ],
-    bookedSeats: { type: [String], default: [] },
   },
   { versionKey: false }
 );
