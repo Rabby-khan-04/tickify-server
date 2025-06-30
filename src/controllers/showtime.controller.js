@@ -112,7 +112,7 @@ const getAllShows = asyncHandler(async (req, res) => {
   }
 });
 
-const getAllUpcomingShow = asyncHandler(async (req, res) => {
+const getUpcomingShow = asyncHandler(async (req, res) => {
   try {
     const now = new Date();
     const rawShows = await Showtime.find()
@@ -122,37 +122,45 @@ const getAllUpcomingShow = asyncHandler(async (req, res) => {
       })
       .populate("theaters.theaterId");
 
-    const shows = rawShows
-      .map((show) => {
-        const cleanTheater = show.theaters
-          .map((theater) => {
-            const cleanedDate = theater.dates
-              .map((dateObj) => {
-                const futureShowTimes = dateObj.showtimes.filter(
-                  (dateTime) => dateTime > now
-                );
+    // const shows = rawShows
+    //   .map((show) => {
+    //     const cleanTheater = show.theaters
+    //       .map((theater) => {
+    //         const cleanedDate = theater.dates
+    //           .map((dateObj) => {
+    //             const futureShowTimes = dateObj.showtimes.filter(
+    //               (dateTime) => dateTime > now
+    //             );
 
-                const dateObjPlain = dateObj.toObject();
+    //             const dateObjPlain = dateObj.toObject();
 
-                return futureShowTimes.length > 0
-                  ? { ...dateObjPlain, showtimes: futureShowTimes }
-                  : null;
-              })
-              .filter(Boolean);
+    //             return futureShowTimes.length > 0
+    //               ? { ...dateObjPlain, showtimes: futureShowTimes }
+    //               : null;
+    //           })
+    //           .filter(Boolean);
 
-            const theaterPlainObj = theater.toObject();
+    //         const theaterPlainObj = theater.toObject();
 
-            return cleanedDate.length > 0
-              ? { ...theaterPlainObj, dates: cleanedDate }
-              : null;
-          })
-          .filter(Boolean);
+    //         return cleanedDate.length > 0
+    //           ? { ...theaterPlainObj, dates: cleanedDate }
+    //           : null;
+    //       })
+    //       .filter(Boolean);
 
-        const showPlainObj = show.toObject();
+    //     const showPlainObj = show.toObject();
 
-        return { ...showPlainObj, theaters: cleanTheater };
-      })
-      .filter((show) => show.theaters.length > 0);
+    //     return { ...showPlainObj, theaters: cleanTheater };
+    //   })
+    //   .filter((show) => show.theaters.length > 0);
+
+    const shows = rawShows.filter((show) =>
+      show.theaters.some((theater) =>
+        theater.dates.some((dateObj) =>
+          dateObj.showtimes.some((time) => time > now)
+        )
+      )
+    );
 
     return res
       .status(status.OK)
@@ -175,6 +183,54 @@ const getAllUpcomingShow = asyncHandler(async (req, res) => {
   }
 });
 
-const ShowtimeController = { addShow, getAllShows, getAllUpcomingShow };
+const getAShow = asyncHandler(async (req, res) => {
+  try {
+    const now = new Date();
+    const { showId } = req.params;
+
+    const show = await Showtime.findById(showId)
+      .populate("movie")
+      .populate("theaters.theaterId");
+
+    const futureShowTimes = show.theaters
+      .map((theater) => {
+        const cleanedDates = theater.dates
+          .map((dateObj) => {
+            const futureTimes = dateObj.showtimes.filter((time) => time > now);
+
+            const plainDateObj = dateObj.toObject();
+
+            return futureTimes.length > 0
+              ? { ...plainDateObj, showtimes: futureTimes }
+              : null;
+          })
+          .filter(Boolean);
+
+        const plainTheaterObj = theater.toObject();
+
+        return cleanedDates.length > 0
+          ? { ...plainTheaterObj, dates: cleanedDates }
+          : null;
+      })
+      .filter(Boolean);
+
+    show.theaters = futureShowTimes;
+
+    return res
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, show, "Show fetched successfully!!"));
+  } catch (error) {
+    console.log(`ERROR in fetching a show: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching a show!!"
+    );
+  }
+});
+
+const ShowtimeController = { addShow, getAllShows, getUpcomingShow, getAShow };
 
 export default ShowtimeController;

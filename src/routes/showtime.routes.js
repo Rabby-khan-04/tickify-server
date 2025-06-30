@@ -20,6 +20,7 @@ router
     ShowtimeController.getAllShows
   );
 
-router.route("/upcoming").get(ShowtimeController.getAllUpcomingShow);
+router.route("/upcoming").get(ShowtimeController.getUpcomingShow);
+router.route("/:showId").get(ShowtimeController.getAShow);
 
 export default router;
