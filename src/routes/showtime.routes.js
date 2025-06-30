@@ -13,11 +13,13 @@ router
   );
 
 router
-  .route("/")
+  .route("/all")
   .get(
     AuthMiddleware.verifyJwt,
     AuthMiddleware.verifyAdmin,
     ShowtimeController.getAllShows
   );
+
+router.route("/upcoming").get(ShowtimeController.getAllUpcomingShow);
 
 export default router;

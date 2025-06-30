@@ -112,6 +112,69 @@ const getAllShows = asyncHandler(async (req, res) => {
   }
 });
 
-const ShowtimeController = { addShow, getAllShows };
+const getAllUpcomingShow = asyncHandler(async (req, res) => {
+  try {
+    const now = new Date();
+    const rawShows = await Showtime.find()
+      .populate({
+        path: "movie",
+        select: "-casts",
+      })
+      .populate("theaters.theaterId");
+
+    const shows = rawShows
+      .map((show) => {
+        const cleanTheater = show.theaters
+          .map((theater) => {
+            const cleanedDate = theater.dates
+              .map((dateObj) => {
+                const futureShowTimes = dateObj.showtimes.filter(
+                  (dateTime) => dateTime > now
+                );
+
+                const dateObjPlain = dateObj.toObject();
+
+                return futureShowTimes.length > 0
+                  ? { ...dateObjPlain, showtimes: futureShowTimes }
+                  : null;
+              })
+              .filter(Boolean);
+
+            const theaterPlainObj = theater.toObject();
+
+            return cleanedDate.length > 0
+              ? { ...theaterPlainObj, dates: cleanedDate }
+              : null;
+          })
+          .filter(Boolean);
+
+        const showPlainObj = show.toObject();
+
+        return { ...showPlainObj, theaters: cleanTheater };
+      })
+      .filter((show) => show.theaters.length > 0);
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          shows,
+          "Upcoming shows fetched successfully!!"
+        )
+      );
+  } catch (error) {
+    console.log(`Upcoming show ERROR: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Somethign went wrong while fetching upcoming shows!!"
+    );
+  }
+});
+
+const ShowtimeController = { addShow, getAllShows, getAllUpcomingShow };
 
 export default ShowtimeController;
