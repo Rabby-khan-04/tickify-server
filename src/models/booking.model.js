@@ -10,6 +10,8 @@ const bookingSchema = new Schema(
     },
     movieId: { type: Schema.Types.ObjectId, required: true, ref: "Movie" },
     seats: [String],
+    date: { type: String, required: true },
+    time: { type: String, required: true },
     totalPrice: { type: Number, required: true },
     status: { type: String, default: "booked" },
     paymentStatus: { type: String, default: "pending" },

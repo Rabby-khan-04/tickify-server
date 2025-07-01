@@ -19,7 +19,7 @@ const verifyJwt = asyncHandler(async (req, _, next) => {
       throw new ApiError(status.UNAUTHORIZED, "Unauthorized Access");
 
     const user = await User.findById(decoded._id).select(
-      "-createdAt -updatedAt"
+      "-createdAt -updatedAt -favorites"
     );
 
     if (!user) throw new ApiError(status.UNAUTHORIZED, "Unauthorized Access");

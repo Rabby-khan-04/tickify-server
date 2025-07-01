@@ -74,6 +74,8 @@ const bookSeat = asyncHandler(async (req, res) => {
       showtimeId: showId,
       movieId,
       seats,
+      date,
+      time,
       totalPrice: seats.length * theater.price,
     };
 
@@ -96,6 +98,60 @@ const bookSeat = asyncHandler(async (req, res) => {
   }
 });
 
-const BookingController = { bookSeat };
+const getMyBookings = asyncHandler(async (req, res) => {
+  try {
+    const user = req.user;
+
+    const bookings = await Booking.find({ userId: user._id });
+
+    res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          bookings,
+          "Bookings data fetched successfully!!"
+        )
+      );
+  } catch (error) {
+    console.log(`ERROR in fetching my bookings: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching my bookings!!"
+    );
+  }
+});
+
+const getSpecificBooking = asyncHandler(async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    const booking = await Booking.findById(bookingId);
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          booking,
+          "Booking data fetched successfully!!"
+        )
+      );
+  } catch (error) {
+    console.log(`ERROR in sepecific booking data fetching: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching specifc booking!!"
+    );
+  }
+});
+
+const BookingController = { bookSeat, getMyBookings, getSpecificBooking };
 
 export default BookingController;
