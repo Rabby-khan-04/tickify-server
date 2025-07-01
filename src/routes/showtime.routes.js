@@ -23,4 +23,8 @@ router
 router.route("/upcoming").get(ShowtimeController.getUpcomingShow);
 router.route("/:showId").get(ShowtimeController.getAShow);
 
+router
+  .route("/booked-seats/:showtimeId")
+  .get(ShowtimeController.getBookedSeats);
+
 export default router;

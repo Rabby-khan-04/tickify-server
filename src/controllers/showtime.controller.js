@@ -241,6 +241,61 @@ const getAShow = asyncHandler(async (req, res) => {
   }
 });
 
-const ShowtimeController = { addShow, getAllShows, getUpcomingShow, getAShow };
+const getBookedSeats = asyncHandler(async (req, res) => {
+  try {
+    const { showtimeId } = req.params;
+    const { theaterId, date, time } = req.body;
+
+    const show = await Showtime.findById(showtimeId);
+
+    const theater = show.theaters.find(
+      (savedTheater) => savedTheater.theaterId.toString() === theaterId
+    );
+
+    const dateBlock = theater.dates.find(
+      (savedDate) => savedDate.date === date
+    );
+
+    const showtime = dateBlock.showtimes.find(
+      (savedTime) =>
+        savedTime.time.getTime() === new Date(`${date}T${time}`).getTime()
+    );
+
+    if (!showtime)
+      throw new ApiError(
+        status.NOT_FOUND,
+        "Show for the theater/date/time not found!!"
+      );
+
+    const bookedSeats = showtime.bookedSeats;
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          bookedSeats,
+          "Booked seats fetched successfully!!"
+        )
+      );
+  } catch (error) {
+    console.log(`ERROR in booked seats fetching: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went worng while fetching booked seats!!"
+    );
+  }
+});
+
+const ShowtimeController = {
+  addShow,
+  getAllShows,
+  getUpcomingShow,
+  getAShow,
+  getBookedSeats,
+};
 
 export default ShowtimeController;
