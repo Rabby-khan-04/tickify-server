@@ -11,6 +11,7 @@ const showtimeSchema = new Schema(
           ref: "Theater",
           required: true,
         },
+        price: { type: Number, required: true },
         dates: [
           {
             _id: false,

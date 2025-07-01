@@ -10,6 +10,12 @@ const addShow = asyncHandler(async (req, res) => {
   try {
     const { movieId, theaters } = req.body;
 
+    if (!movieId || !theaters)
+      throw new ApiError(
+        status.NOT_FOUND,
+        "Movie, Theater and Price are required"
+      );
+
     let movie = await Movie.findOne({ movieId });
 
     if (!movie) {
