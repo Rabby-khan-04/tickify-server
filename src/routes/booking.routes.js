@@ -16,4 +16,20 @@ router
   .route("/my/:bookingId")
   .get(AuthMiddleware.verifyJwt, BookingController.getSpecificBooking);
 
+router
+  .route("/:showtimeId")
+  .get(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyAdmin,
+    BookingController.getBookingForShowtime
+  );
+
+router
+  .route("/")
+  .get(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyJwt,
+    BookingController.getAllbookings
+  );
+
 export default router;

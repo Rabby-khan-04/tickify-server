@@ -152,6 +152,60 @@ const getSpecificBooking = asyncHandler(async (req, res) => {
   }
 });
 
-const BookingController = { bookSeat, getMyBookings, getSpecificBooking };
+const getBookingForShowtime = asyncHandler(async (req, res) => {
+  try {
+    const { showtimeId } = req.params;
+
+    const bookings = await Booking.find({ showtimeId });
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          bookings,
+          "Booking for a showtime fetched successfully!!"
+        )
+      );
+  } catch (error) {
+    console.log(`ERROR in fetching booking for showtime: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Somethign went wrong while fetching bookings for a showtime!!"
+    );
+  }
+});
+
+const getAllbookings = asyncHandler(async (req, res) => {
+  try {
+    const bookings = await Booking.find({});
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(status.OK, bookings, "Bookings fetched successfully!!")
+      );
+  } catch (error) {
+    console.log(`ERROR in fetching bookings: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Somethign went wrong while fetching bookings!!"
+    );
+  }
+});
+
+const BookingController = {
+  bookSeat,
+  getMyBookings,
+  getSpecificBooking,
+  getBookingForShowtime,
+  getAllbookings,
+};
 
 export default BookingController;
