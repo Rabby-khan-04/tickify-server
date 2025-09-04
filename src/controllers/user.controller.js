@@ -154,43 +154,33 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  try {
-    const incomingRefreshToken =
-      req?.cookies?.refreshToken || req?.body?.refreshToken;
+  const incomingRefreshToken =
+    req?.cookies?.refreshToken || req?.body?.refreshToken;
 
-    if (!incomingRefreshToken)
-      throw new ApiError(status.UNAUTHORIZED, "Unauthorized Access!!");
-
-    const decoded = jwt.verify(
-      incomingRefreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
-
-    const user = await User.findById(decoded._id).select("+refreshToken");
-
-    if (!user || incomingRefreshToken !== user.refreshToken)
-      throw new ApiError(
-        status.UNAUTHORIZED,
-        "Invalid or expired refresh token!!"
+  if (incomingRefreshToken) {
+    try {
+      const decoded = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET
       );
 
-    await User.findByIdAndUpdate(user._id, { $unset: { refreshToken: 1 } });
+      const user = await User.findById(decoded._id).select("+refreshToken");
 
-    return res
-      .clearCookie("accessToken", cookieOptions)
-      .clearCookie("refreshToken", cookieOptions)
-      .status(status.OK)
-      .json(new ApiResponce(status.OK, {}, "User logged out successfully!!"));
-  } catch (error) {
-    console.log(`Logout Error: ${error}`);
+      if (!user || incomingRefreshToken !== user.refreshToken)
+        throw new ApiError(
+          status.UNAUTHORIZED,
+          "Invalid or expired refresh token!!"
+        );
 
-    if (error instanceof ApiError) throw error;
-
-    throw new ApiError(
-      status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while logging out user!!"
-    );
+      await User.findByIdAndUpdate(user._id, { $unset: { refreshToken: 1 } });
+    } catch {}
   }
+
+  return res
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .status(status.OK)
+    .json(new ApiResponce(status.OK, {}, "User logged out successfully!!"));
 });
 
 const getAUser = asyncHandler(async (req, res) => {
