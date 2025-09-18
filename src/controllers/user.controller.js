@@ -6,7 +6,6 @@ import ApiResponce from "../utils/ApiResponse.js";
 import { cookieOptions } from "../constants.js";
 import jwt from "jsonwebtoken";
 import Movie from "../models/movie.model.js";
-import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -30,10 +29,10 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, photo } = req.body;
 
-    if (!name || !email) {
-      throw new ApiError(status.BAD_REQUEST, "Email and name are required!!");
+    if (!name || !email || !photo) {
+      throw new ApiError(status.BAD_REQUEST, "Email, name and are required!!");
     }
 
     const existingUser = await User.findOne({ email });
@@ -45,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
       );
     }
 
-    const newUser = new User({ name, email });
+    const newUser = new User({ name, email, photo });
 
     const user = await newUser.save();
 
@@ -302,6 +301,7 @@ const getFavoriteMovies = asyncHandler(async (req, res) => {
     );
   }
 });
+
 const UserController = {
   registerUser,
   issueJWT,
