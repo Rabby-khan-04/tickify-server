@@ -26,4 +26,6 @@ router
     TheaterController.deleteTheater
   );
 
+router.route("/:theaterId").get(TheaterController.getATheater);
+
 export default router;

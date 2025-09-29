@@ -4,6 +4,13 @@ import AuthMiddleware from "../middleware/auth.middleware.js";
 
 const router = Router();
 
+router
+  .route("/")
+  .get(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyAdmin,
+    UserController.getAllUser
+  );
 router.route("/me").get(AuthMiddleware.verifyJwt, UserController.getAUser);
 router
   .route("/favorite/:movieId")

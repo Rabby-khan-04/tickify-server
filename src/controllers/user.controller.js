@@ -203,6 +203,29 @@ const getAUser = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllUser = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.find({})
+      .sort({ createdAt: -1 })
+      .select("-favorites -updatedAt -createdAt");
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(status.OK, user, "User info fetched successfully!!")
+      );
+  } catch (error) {
+    console.log(`Getting All Users ERROR: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while getting user info!!"
+    );
+  }
+});
+
 const addFavoriteMovies = asyncHandler(async (req, res) => {
   try {
     const incomingUser = req.user;
@@ -308,6 +331,7 @@ const UserController = {
   refreshAccessToken,
   logoutUser,
   getAUser,
+  getAllUser,
   addFavoriteMovies,
   removeMovieFromFavorites,
   getFavoriteMovies,

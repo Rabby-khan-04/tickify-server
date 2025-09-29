@@ -60,6 +60,27 @@ const getAllTheaters = asyncHandler(async (req, res) => {
     );
   }
 });
+const getATheater = asyncHandler(async (req, res) => {
+  try {
+    const { theaterId } = req.params;
+    const theater = await Theater.findById(theaterId);
+
+    res
+      .status(status.OK)
+      .json(
+        new ApiResponce(status.OK, theater, "Theater fetched successfully!!")
+      );
+  } catch (error) {
+    console.log(`Theater fetching ERROR: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching the theaters!!"
+    );
+  }
+});
 
 const deleteTheater = asyncHandler(async (req, res) => {
   try {
@@ -85,6 +106,11 @@ const deleteTheater = asyncHandler(async (req, res) => {
   }
 });
 
-const TheaterController = { addTheater, getAllTheaters, deleteTheater };
+const TheaterController = {
+  addTheater,
+  getAllTheaters,
+  deleteTheater,
+  getATheater,
+};
 
 export default TheaterController;
