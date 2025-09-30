@@ -99,10 +99,31 @@ const getAllMovies = asyncHandler(async (req, res) => {
   }
 });
 
+const getMovieDetails = asyncHandler(async (req, res) => {
+  try {
+    const { movieId } = req.params;
+    const movie = await Movie.findOne({ movieId });
+
+    return res
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, movie, "Movie fetched successfully!!"));
+  } catch (error) {
+    console.log(`ERROR in fetching all movies: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.OK,
+      "Something went wrong while fetching movies!!"
+    );
+  }
+});
+
 const MovieController = {
   getNowPlayingMovies,
   getUpcomingMovies,
   getAllMovies,
+  getMovieDetails,
 };
 
 export default MovieController;

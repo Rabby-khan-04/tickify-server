@@ -12,7 +12,7 @@ const movieSchema = new Schema(
     release_date: { type: String, required: true },
     original_language: { type: String, required: true },
     popularity: { type: Number, required: true },
-    tagline: { type: String, required: true },
+    tagline: { type: String, default: "" },
     runtime: { type: Number, required: true },
     vote_average: { type: Number, required: true },
     adult: { type: Boolean, required: true },

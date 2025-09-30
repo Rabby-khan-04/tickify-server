@@ -20,4 +20,6 @@ router
     MovieController.getAllMovies
   );
 
+router.route("/:movieId").get(MovieController.getMovieDetails);
+
 export default router;
