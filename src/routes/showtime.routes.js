@@ -26,6 +26,6 @@ router.route("/movie/:movieId").get(ShowtimeController.getShowByMovie);
 
 router
   .route("/booked-seats/:showtimeId")
-  .get(ShowtimeController.getBookedSeats);
+  .post(ShowtimeController.getBookedSeats);
 
 export default router;
