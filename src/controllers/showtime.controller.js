@@ -241,6 +241,62 @@ const getAShow = asyncHandler(async (req, res) => {
   }
 });
 
+const getShowByMovie = asyncHandler(async (req, res) => {
+  try {
+    const now = new Date();
+    const { movieId } = req.params;
+
+    const show = await Showtime.findOne({ movie: movieId })
+      .populate("movie")
+      .populate("theaters.theaterId");
+
+    if (show) {
+      const futureShowTimes = show.theaters
+        .map((theater) => {
+          const cleanedDates = theater.dates
+            .map((dateObj) => {
+              const futureTimes = dateObj.showtimes.filter(
+                (time) => time.time > now
+              );
+
+              const plainDateObj = dateObj.toObject();
+
+              return futureTimes.length > 0
+                ? { ...plainDateObj, showtimes: futureTimes }
+                : null;
+            })
+            .filter(Boolean);
+
+          const plainTheaterObj = theater.toObject();
+
+          return cleanedDates.length > 0
+            ? { ...plainTheaterObj, dates: cleanedDates }
+            : null;
+        })
+        .filter(Boolean);
+
+      show.theaters = futureShowTimes;
+    } else {
+      return res
+        .status(status.OK)
+        .json(new ApiResponce(status.OK, [], "No shows found!!"));
+    }
+
+    return res
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, show, "Show fetched successfully!!"));
+  } catch (error) {
+    console.log(`ERROR in fetching a show: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching a show!!"
+    );
+  }
+});
+
 const getBookedSeats = asyncHandler(async (req, res) => {
   try {
     const { showtimeId } = req.params;
@@ -296,6 +352,7 @@ const ShowtimeController = {
   getUpcomingShow,
   getAShow,
   getBookedSeats,
+  getShowByMovie,
 };
 
 export default ShowtimeController;

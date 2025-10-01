@@ -309,7 +309,7 @@ const getFavoriteMovies = asyncHandler(async (req, res) => {
       .json(
         new ApiResponce(
           status.OK,
-          user,
+          user.favorites,
           "Favorite movies fetched successfully!!"
         )
       );

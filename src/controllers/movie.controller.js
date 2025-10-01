@@ -102,19 +102,65 @@ const getAllMovies = asyncHandler(async (req, res) => {
 const getMovieDetails = asyncHandler(async (req, res) => {
   try {
     const { movieId } = req.params;
-    const movie = await Movie.findOne({ movieId });
+
+    if (!movieId)
+      throw new ApiError(status.NOT_FOUND, "Movie id is required!!");
+
+    let movie = await Movie.findOne({ movieId });
+
+    if (!movie) {
+      const [movieDetailsResponse, movieCreditsResponse] = await Promise.all([
+        axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
+          headers: {
+            Accept: "Application/json",
+            Authorization: `Bearer ${process.env.TMDB_ACCESS_TOKEN}`,
+          },
+        }),
+        axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, {
+          headers: {
+            Accept: "Application/json",
+            Authorization: `Bearer ${process.env.TMDB_ACCESS_TOKEN}`,
+          },
+        }),
+      ]);
+
+      const movieApiData = movieDetailsResponse.data;
+      const creditData = movieCreditsResponse.data;
+
+      if (!movieApiData || !creditData)
+        throw new ApiError(status.NOT_FOUND, "Movie not found!!");
+
+      const movieDetails = {
+        movieId: movieApiData.id,
+        title: movieApiData.title,
+        overview: movieApiData.overview,
+        poster_path: movieApiData.poster_path,
+        backdrop_path: movieApiData.backdrop_path,
+        genres: movieApiData.genres,
+        casts: creditData.cast.splice(0, 11),
+        release_date: movieApiData.release_date,
+        original_language: movieApiData.original_language,
+        popularity: movieApiData.popularity,
+        tagline: movieApiData.tagline,
+        runtime: movieApiData.runtime,
+        vote_average: movieApiData.vote_average,
+        adult: movieApiData.adult,
+      };
+
+      movie = await Movie.create(movieDetails);
+    }
 
     return res
       .status(status.OK)
       .json(new ApiResponce(status.OK, movie, "Movie fetched successfully!!"));
   } catch (error) {
-    console.log(`ERROR in fetching all movies: ${error}`);
+    console.log(`ERROR in fetching movies details: ${error}`);
 
     if (error instanceof ApiError) throw error;
 
     throw new ApiError(
       status.OK,
-      "Something went wrong while fetching movies!!"
+      "Something went wrong while fetching movie details!!"
     );
   }
 });
