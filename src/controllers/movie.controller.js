@@ -165,11 +165,36 @@ const getMovieDetails = asyncHandler(async (req, res) => {
   }
 });
 
+const getMovieById = asyncHandler(async (req, res) => {
+  try {
+    const { movieId } = req.params;
+
+    if (!movieId)
+      throw new ApiError(status.NOT_FOUND, "Movie id is required!!");
+
+    let movie = await Movie.findById(movieId);
+
+    return res
+      .status(status.OK)
+      .json(new ApiResponce(status.OK, movie, "Movie fetched successfully!!"));
+  } catch (error) {
+    console.log(`ERROR in fetching movies details: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.OK,
+      "Something went wrong while fetching movie details!!"
+    );
+  }
+});
+
 const MovieController = {
   getNowPlayingMovies,
   getUpcomingMovies,
   getAllMovies,
   getMovieDetails,
+  getMovieById,
 };
 
 export default MovieController;

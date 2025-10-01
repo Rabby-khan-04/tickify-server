@@ -21,5 +21,6 @@ router
   );
 
 router.route("/:movieId").get(MovieController.getMovieDetails);
+router.route("/movie/:movieId").get(MovieController.getMovieById);
 
 export default router;
