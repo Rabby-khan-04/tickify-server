@@ -69,6 +69,11 @@ const bookSeat = asyncHandler(async (req, res) => {
       }
     );
 
+    const servicecharge = theater.price * 0.06;
+    const totalServiceCharge = servicecharge * seats.length;
+    const totalPrice = seats.length * theater.price;
+    const totalBill = totalServiceCharge + totalPrice;
+
     const bookingData = {
       userId: user._id,
       showtimeId: showId,
@@ -76,7 +81,7 @@ const bookSeat = asyncHandler(async (req, res) => {
       seats,
       date,
       time,
-      totalPrice: seats.length * theater.price,
+      totalPrice: totalBill,
     };
 
     const booking = await Booking.create(bookingData);
