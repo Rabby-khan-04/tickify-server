@@ -312,12 +312,9 @@ const getBookedSeats = asyncHandler(async (req, res) => {
       (savedDate) => savedDate.date === date
     );
 
-    const showtime = dateBlock.showtimes.find(
-      (savedTime) =>
-        savedTime.time.getTime() === new Date(`${date}T${time}`).getTime()
-    );
-
-    console.log(showtime);
+    const showtime = dateBlock.showtimes.find((savedTime) => {
+      return savedTime.time.getTime() === Number(time);
+    });
 
     if (!showtime)
       throw new ApiError(
