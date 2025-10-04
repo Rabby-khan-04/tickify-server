@@ -42,4 +42,8 @@ app.use("/api/v1/bookings", bookingRouter);
 // Global error handler
 app.use(globalErrorHandler);
 
+app.get("/", (req, res) => {
+  res.send({ success: true });
+});
+
 export default app;

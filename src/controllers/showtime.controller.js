@@ -317,6 +317,8 @@ const getBookedSeats = asyncHandler(async (req, res) => {
         savedTime.time.getTime() === new Date(`${date}T${time}`).getTime()
     );
 
+    console.log(showtime);
+
     if (!showtime)
       throw new ApiError(
         status.NOT_FOUND,
