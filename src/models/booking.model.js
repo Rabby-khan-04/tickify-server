@@ -15,6 +15,7 @@ const bookingSchema = new Schema(
     totalPrice: { type: Number, required: true },
     status: { type: String, default: "booked" },
     paymentStatus: { type: String, default: "pending" },
+    paymentLink: { type: String, default: "" },
   },
   {
     timestamps: { createdAt: "bookedAt", updatedAt: "updatedAt" },

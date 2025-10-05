@@ -4,7 +4,7 @@ const movieSchema = new Schema(
   {
     movieId: { type: Number, required: true },
     title: { type: String, required: true },
-    overview: { type: String, required: true },
+    overview: { type: String, default: "" },
     poster_path: { type: String, required: true },
     backdrop_path: { type: String, required: true },
     genres: { type: [{ id: String, name: String }], default: [] },

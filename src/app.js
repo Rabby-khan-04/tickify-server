@@ -2,8 +2,16 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import globalErrorHandler from "./utils/globalErrorHandler.js";
+import stripeWebhooks from "./controllers/stripe.webhook.js";
 
 const app = express();
+
+// Stripe Webhook
+app.use(
+  "/api/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhooks
+);
 
 // middleware
 app.use(
@@ -26,10 +34,6 @@ import movieRouter from "./routes/movie.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
 import authRouter from "./routes/auth.routes.js";
 
-// app.use("/", (req, res) => {
-//   res.send(`Tckify Server is running!!`);
-// });
-
 // Router uses
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/auth", authRouter);
@@ -42,8 +46,8 @@ app.use("/api/v1/bookings", bookingRouter);
 // Global error handler
 app.use(globalErrorHandler);
 
-app.get("/", (req, res) => {
-  res.send({ success: true });
+app.use("/", (req, res) => {
+  res.send(`Tckify Server is running!!`);
 });
 
 export default app;

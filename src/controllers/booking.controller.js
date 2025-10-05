@@ -5,15 +5,17 @@ import Showtime from "../models/showtime.model.js";
 import ApiResponce from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import Booking from "../models/booking.model.js";
+import Stripe from "stripe";
 
 const bookSeat = asyncHandler(async (req, res) => {
   try {
     const user = req.user;
     const { date, time } = req.params;
+    const { origin } = req.headers;
 
     const { showId, movieId, seats, theaterId } = req.body;
 
-    const show = await Showtime.findById(showId);
+    const show = await Showtime.findById(showId).populate("movie");
 
     if (!show)
       throw new ApiError(
@@ -85,6 +87,39 @@ const bookSeat = asyncHandler(async (req, res) => {
     };
 
     const booking = await Booking.create(bookingData);
+
+    const stripeIinstance = new Stripe(process.env.STRIPE_SK);
+
+    const line_items = [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: show.movie.title,
+          },
+          unit_amount: Math.floor(booking.totalPrice) * 100,
+        },
+        quantity: 1,
+      },
+    ];
+
+    const session = await stripeIinstance.checkout.sessions.create({
+      success_url: `${origin}/loading/success`,
+      cancel_url: `${origin}/bookings`,
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items,
+      metadata: {
+        bookingId: booking._id.toString(),
+      },
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    });
+
+    console.log(booking._id.toString());
+    console.log(session);
+
+    booking.paymentLink = session.url;
+    await booking.save({ validateBeforeSave: false });
 
     res
       .status(status.CREATED)
@@ -214,3 +249,13 @@ const BookingController = {
 };
 
 export default BookingController;
+
+// switch (event.type) {
+//   case 'payment_intent.succeeded':
+//     const paymentIntentSucceeded = event.data.object;
+//     // Then define and call a function to handle the event payment_intent.succeeded
+//     break;
+//   // ... handle other event types
+//   default:
+//     console.log(`Unhandled event type ${event.type}`);
+// }
