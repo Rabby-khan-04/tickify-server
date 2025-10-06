@@ -13,6 +13,10 @@ router
   .get(AuthMiddleware.verifyJwt, BookingController.getMyBookings);
 
 router
+  .route("/my-booking-count")
+  .get(AuthMiddleware.verifyJwt, BookingController.getBookingCount);
+
+router
   .route("/my/:bookingId")
   .get(AuthMiddleware.verifyJwt, BookingController.getSpecificBooking);
 

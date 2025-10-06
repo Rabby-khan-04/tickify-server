@@ -142,7 +142,13 @@ const getMyBookings = asyncHandler(async (req, res) => {
   try {
     const user = req.user;
 
+    const { page, limit } = req.query;
+
+    const skip = page * limit;
+
     const bookings = await Booking.find({ userId: user._id })
+      .skip(skip)
+      .limit(limit)
       .sort({ bookedAt: -1 })
       .populate("movieId");
 
@@ -153,6 +159,35 @@ const getMyBookings = asyncHandler(async (req, res) => {
           status.OK,
           bookings,
           "Bookings data fetched successfully!!"
+        )
+      );
+  } catch (error) {
+    console.log(`ERROR in fetching my bookings: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching my bookings!!"
+    );
+  }
+});
+
+const getBookingCount = asyncHandler(async (req, res) => {
+  try {
+    const user = req.user;
+
+    const bookingsCount = await Booking.find({
+      userId: user._id,
+    }).estimatedDocumentCount();
+
+    res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          bookingsCount,
+          "Bookings count fetched successfully!!"
         )
       );
   } catch (error) {
@@ -248,6 +283,7 @@ const BookingController = {
   getSpecificBooking,
   getBookingForShowtime,
   getAllbookings,
+  getBookingCount,
 };
 
 export default BookingController;
