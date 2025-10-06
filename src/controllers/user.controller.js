@@ -85,8 +85,14 @@ const issueJWT = asyncHandler(async (req, res) => {
 
     return res
       .status(status.OK)
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
+      .cookie("accessToken", accessToken, {
+        ...cookieOptions,
+        maxAge: 24 * 60 * 60 * 1000,
+      })
+      .cookie("refreshToken", refreshToken, {
+        ...cookieOptions,
+        maxAge: 10 * 24 * 60 * 60 * 1000,
+      })
       .json(
         new ApiResponce(
           status.OK,

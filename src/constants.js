@@ -1,1 +1,6 @@
-export const cookieOptions = { httpOnly: true, secure: true };
+export const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  partitioned: true,
+};

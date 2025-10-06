@@ -142,7 +142,9 @@ const getMyBookings = asyncHandler(async (req, res) => {
   try {
     const user = req.user;
 
-    const bookings = await Booking.find({ userId: user._id });
+    const bookings = await Booking.find({ userId: user._id })
+      .sort({ bookedAt: -1 })
+      .populate("movieId");
 
     res
       .status(status.OK)
