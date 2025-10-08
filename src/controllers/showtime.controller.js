@@ -63,7 +63,7 @@ const addShow = asyncHandler(async (req, res) => {
     theaters.forEach((theater) => {
       theater.dates.forEach((dateTiem) => {
         dateTiem.showtimes = dateTiem.showtimes.map((time) => ({
-          time: new Date(`${dateTiem.date}T${time}`),
+          time: new Date(`${dateTiem.date}T${time}:00+06:00`),
         }));
       });
     });
@@ -93,7 +93,8 @@ const addShow = asyncHandler(async (req, res) => {
             if (existingDate) {
               incomingDate.showtimes.forEach((newShowTime) => {
                 const timeAlredyExists = existingDate.showtimes.some(
-                  (savedTime) => savedTime.time.getTime() === newShowTime.time
+                  (savedTime) =>
+                    savedTime.time.getTime() === newShowTime.time.getTime()
                 );
 
                 if (!timeAlredyExists) {
@@ -194,6 +195,7 @@ const getUpcomingShow = asyncHandler(async (req, res) => {
 const getAShow = asyncHandler(async (req, res) => {
   try {
     const now = new Date();
+    const nowUTC = now.getTime();
     const { showId } = req.params;
 
     const show = await Showtime.findById(showId)
@@ -205,7 +207,7 @@ const getAShow = asyncHandler(async (req, res) => {
         const cleanedDates = theater.dates
           .map((dateObj) => {
             const futureTimes = dateObj.showtimes.filter(
-              (time) => time.time > now
+              (time) => new Date(time.time).getTime() > nowUTC
             );
 
             const plainDateObj = dateObj.toObject();

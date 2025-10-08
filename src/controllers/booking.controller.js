@@ -31,10 +31,17 @@ const bookSeat = asyncHandler(async (req, res) => {
       (savedDate) => savedDate.date === date
     );
 
-    const showTime = dateBlock.showtimes.find(
-      (savedTime) =>
-        savedTime.time.getTime() === new Date(`${date}T${time}`).getTime()
-    );
+    const showTime = dateBlock.showtimes.find((savedTime) => {
+      const clientDate = new Date(`${date}T${time}:00+06:00`);
+
+      console.log("Saved time:", savedTime.time.toISOString());
+      console.log("Client time:", clientDate.toISOString());
+      console.log("Saved time UTC:", savedTime.time.getTime());
+      console.log("Client time UTC:", clientDate.getTime());
+      console.log("Match:", savedTime.time.getTime() === clientDate.getTime());
+
+      return savedTime.time.getTime() === clientDate.getTime();
+    });
 
     if (!showTime)
       throw new ApiError(
@@ -66,7 +73,7 @@ const bookSeat = asyncHandler(async (req, res) => {
             "t.theaterId": new mongoose.Types.ObjectId(theaterId),
           },
           { "d.date": date },
-          { "s.time": new Date(`${date}T${time}`) },
+          { "s.time": new Date(`${date}T${time}:00+06:00`) },
         ],
       }
     );
