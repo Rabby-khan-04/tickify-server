@@ -184,9 +184,9 @@ const getBookingCount = asyncHandler(async (req, res) => {
   try {
     const user = req.user;
 
-    const bookingsCount = await Booking.find({
+    const bookingsCount = await Booking.countDocuments({
       userId: user._id,
-    }).estimatedDocumentCount();
+    });
 
     res
       .status(status.OK)

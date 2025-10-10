@@ -99,6 +99,29 @@ const getAllMovies = asyncHandler(async (req, res) => {
   }
 });
 
+const getMoviesCount = asyncHandler(async (req, res) => {
+  try {
+    const moviesCount = await Movie.estimatedDocumentCount();
+
+    if (!moviesCount) throw new ApiError(status.NOT_FOUND, "Movies not found");
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(status.OK, moviesCount, "Movies fetched successfully!!")
+      );
+  } catch (error) {
+    console.log(`ERROR in fetching all movies: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.OK,
+      "Something went wrong while fetching movies!!"
+    );
+  }
+});
+
 const getMovieDetails = asyncHandler(async (req, res) => {
   try {
     const { movieId } = req.params;
@@ -193,6 +216,7 @@ const MovieController = {
   getNowPlayingMovies,
   getUpcomingMovies,
   getAllMovies,
+  getMoviesCount,
   getMovieDetails,
   getMovieById,
 };

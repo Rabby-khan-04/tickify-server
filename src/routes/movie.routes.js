@@ -20,6 +20,14 @@ router
     MovieController.getAllMovies
   );
 
+router
+  .route("/movies-count")
+  .get(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyAdmin,
+    MovieController.getMoviesCount
+  );
+
 router.route("/:movieId").get(MovieController.getMovieDetails);
 router.route("/movie/:movieId").get(MovieController.getMovieById);
 
