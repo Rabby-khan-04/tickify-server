@@ -77,7 +77,11 @@ const getUpcomingMovies = asyncHandler(async (req, res) => {
 
 const getAllMovies = asyncHandler(async (req, res) => {
   try {
-    const movies = await Movie.find({}).select("-casts -genres");
+    const { page, limit } = req.query;
+    const movies = await Movie.find({})
+      .skip(page * limit)
+      .limit(limit)
+      .select("-casts -genres");
 
     if (!movies.length)
       throw new ApiError(status.NOT_FOUND, "Movies not found");
