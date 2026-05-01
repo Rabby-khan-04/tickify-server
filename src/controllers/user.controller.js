@@ -22,7 +22,7 @@ const generateAccessAndRefreshToken = async (userId) => {
     console.log(`Token generation ERROR: ${error}`);
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while generating token!!"
+      "Something went wrong while generating token!!",
     );
   }
 };
@@ -40,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existingUser) {
       throw new ApiError(
         status.CONFLICT,
-        "Email already exists. Please use a different email!!"
+        "Email already exists. Please use a different email!!",
       );
     }
 
@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
     return res
       .status(status.CREATED)
       .json(
-        new ApiResponce(status.CREATED, user, "User registered successfully!!")
+        new ApiResponce(status.CREATED, user, "User registered successfully!!"),
       );
   } catch (error) {
     console.log(`Registration Error: ${error}`);
@@ -60,7 +60,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while registering the user!"
+      "Something went wrong while registering the user!",
     );
   }
 });
@@ -72,7 +72,7 @@ const issueJWT = asyncHandler(async (req, res) => {
     if (!email)
       throw new ApiError(
         status.BAD_REQUEST,
-        "Credentials are required to login!!"
+        "Credentials are required to login!!",
       );
 
     const user = await User.findOne({ email });
@@ -80,7 +80,7 @@ const issueJWT = asyncHandler(async (req, res) => {
     if (!user) throw new ApiError(status.UNAUTHORIZED, "Invalid email!!");
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-      user._id
+      user._id,
     );
 
     return res
@@ -97,8 +97,8 @@ const issueJWT = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           { accessToken, refreshToken },
-          "User logged in successfully!!"
-        )
+          "User logged in successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`Login ERROR: ${error}`);
@@ -107,7 +107,7 @@ const issueJWT = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while login the user!"
+      "Something went wrong while login the user!",
     );
   }
 });
@@ -121,7 +121,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const decodedToken = jwt.verify(
     incomingRefreshToken,
-    process.env.REFRESH_TOKEN_SECRET
+    process.env.REFRESH_TOKEN_SECRET,
   );
   try {
     const user = await User.findById(decodedToken._id).select("+refreshToken");
@@ -132,7 +132,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh token is expired or used!!");
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-      user._id
+      user._id,
     );
 
     return res
@@ -143,8 +143,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           { accessToken, refreshToken },
-          "Access token refreshed!!"
-        )
+          "Access token refreshed!!",
+        ),
       );
   } catch (error) {
     console.log(`Access token refreshing ERROR: ${error}`);
@@ -153,7 +153,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while refreshing access token!!"
+      "Something went wrong while refreshing access token!!",
     );
   }
 });
@@ -166,7 +166,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     try {
       const decoded = jwt.verify(
         incomingRefreshToken,
-        process.env.REFRESH_TOKEN_SECRET
+        process.env.REFRESH_TOKEN_SECRET,
       );
 
       const user = await User.findById(decoded._id).select("+refreshToken");
@@ -174,7 +174,7 @@ const logoutUser = asyncHandler(async (req, res) => {
       if (!user || incomingRefreshToken !== user.refreshToken)
         throw new ApiError(
           status.UNAUTHORIZED,
-          "Invalid or expired refresh token!!"
+          "Invalid or expired refresh token!!",
         );
 
       await User.findByIdAndUpdate(user._id, { $unset: { refreshToken: 1 } });
@@ -195,7 +195,7 @@ const getAUser = asyncHandler(async (req, res) => {
     return res
       .status(status.OK)
       .json(
-        new ApiResponce(status.OK, user, "User info fetched successfully!!")
+        new ApiResponce(status.OK, user, "User info fetched successfully!!"),
       );
   } catch (error) {
     console.log(`Getting User info ERROR: ${error}`);
@@ -204,7 +204,7 @@ const getAUser = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while getting user info!!"
+      "Something went wrong while getting user info!!",
     );
   }
 });
@@ -218,7 +218,7 @@ const getAllUser = asyncHandler(async (req, res) => {
     return res
       .status(status.OK)
       .json(
-        new ApiResponce(status.OK, user, "User info fetched successfully!!")
+        new ApiResponce(status.OK, user, "User info fetched successfully!!"),
       );
   } catch (error) {
     console.log(`Getting All Users ERROR: ${error}`);
@@ -227,7 +227,7 @@ const getAllUser = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while getting user info!!"
+      "Something went wrong while getting user info!!",
     );
   }
 });
@@ -263,7 +263,7 @@ const addFavoriteMovies = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while adding movie to favorite!!"
+      "Something went wrong while adding movie to favorite!!",
     );
   }
 });
@@ -277,7 +277,7 @@ const removeMovieFromFavorites = asyncHandler(async (req, res) => {
 
     if (user.favorites.includes(movieId)) {
       const newFav = user.favorites.filter(
-        (favorite) => favorite.toString() !== movieId
+        (favorite) => favorite.toString() !== movieId,
       );
 
       user.favorites = newFav;
@@ -296,7 +296,7 @@ const removeMovieFromFavorites = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.OK,
-      "Something went wrong while removing movie from favorite list!!"
+      "Something went wrong while removing movie from favorite list!!",
     );
   }
 });
@@ -316,8 +316,8 @@ const getFavoriteMovies = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           user.favorites,
-          "Favorite movies fetched successfully!!"
-        )
+          "Favorite movies fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`ERROR in fetching frovite moives: ${error}`);
@@ -326,7 +326,7 @@ const getFavoriteMovies = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.OK,
-      "Something went wrong while fetching favorite movies!!"
+      "Something went wrong while fetching favorite movies!!",
     );
   }
 });

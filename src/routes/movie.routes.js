@@ -9,7 +9,7 @@ router.route("/now-playing").get(MovieController.getNowPlayingMovies);
 router.route("/upcoming").get(
   // AuthMiddleware.verifyJwt,
   // AuthMiddleware.verifyAdmin,
-  MovieController.getUpcomingMovies
+  MovieController.getUpcomingMovies,
 );
 
 router
@@ -17,7 +17,7 @@ router
   .get(
     AuthMiddleware.verifyJwt,
     AuthMiddleware.verifyAdmin,
-    MovieController.getAllMovies
+    MovieController.getAllMovies,
   );
 
 router
@@ -25,7 +25,15 @@ router
   .get(
     AuthMiddleware.verifyJwt,
     AuthMiddleware.verifyAdmin,
-    MovieController.getMoviesCount
+    MovieController.getMoviesCount,
+  );
+
+router
+  .route("/movie/:movieId")
+  .patch(
+    AuthMiddleware.verifyJwt,
+    AuthMiddleware.verifyAdmin,
+    MovieController.updateMovie,
   );
 
 router.route("/:movieId").get(MovieController.getMovieDetails);

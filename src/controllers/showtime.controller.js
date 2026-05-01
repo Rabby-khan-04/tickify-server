@@ -13,7 +13,7 @@ const addShow = asyncHandler(async (req, res) => {
     if (!movieId || !theaters)
       throw new ApiError(
         status.NOT_FOUND,
-        "Movie, Theater and Price are required"
+        "Movie, Theater and Price are required",
       );
 
     let movie = await Movie.findOne({ movieId });
@@ -81,20 +81,20 @@ const addShow = asyncHandler(async (req, res) => {
       theaters.forEach((incomingTheater) => {
         const existingTheater = show.theaters.find(
           (savedTheater) =>
-            savedTheater.theaterId.toString() === incomingTheater.theaterId
+            savedTheater.theaterId.toString() === incomingTheater.theaterId,
         );
 
         if (existingTheater) {
           incomingTheater.dates.forEach((incomingDate) => {
             const existingDate = existingTheater.dates.find(
-              (savedDate) => savedDate.date === incomingDate.date
+              (savedDate) => savedDate.date === incomingDate.date,
             );
 
             if (existingDate) {
               incomingDate.showtimes.forEach((newShowTime) => {
                 const timeAlredyExists = existingDate.showtimes.some(
                   (savedTime) =>
-                    savedTime.time.getTime() === newShowTime.time.getTime()
+                    savedTime.time.getTime() === newShowTime.time.getTime(),
                 );
 
                 if (!timeAlredyExists) {
@@ -123,7 +123,7 @@ const addShow = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while adding a showtime!!"
+      "Something went wrong while adding a showtime!!",
     );
   }
 });
@@ -145,7 +145,7 @@ const getAllShows = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while fetching all shows!!"
+      "Something went wrong while fetching all shows!!",
     );
   }
 });
@@ -166,9 +166,9 @@ const getUpcomingShow = asyncHandler(async (req, res) => {
     const shows = rawShows.filter((show) =>
       show.theaters.some((theater) =>
         theater.dates.some((dateObj) =>
-          dateObj.showtimes.some((timeObj) => timeObj.time > now)
-        )
-      )
+          dateObj.showtimes.some((timeObj) => timeObj.time > now),
+        ),
+      ),
     );
 
     return res
@@ -177,8 +177,8 @@ const getUpcomingShow = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           shows,
-          "Upcoming shows fetched successfully!!"
-        )
+          "Upcoming shows fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`Upcoming show ERROR: ${error}`);
@@ -187,7 +187,7 @@ const getUpcomingShow = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Somethign went wrong while fetching upcoming shows!!"
+      "Somethign went wrong while fetching upcoming shows!!",
     );
   }
 });
@@ -207,7 +207,7 @@ const getAShow = asyncHandler(async (req, res) => {
         const cleanedDates = theater.dates
           .map((dateObj) => {
             const futureTimes = dateObj.showtimes.filter(
-              (time) => new Date(time.time).getTime() > nowUTC
+              (time) => new Date(time.time).getTime() > nowUTC,
             );
 
             const plainDateObj = dateObj.toObject();
@@ -238,7 +238,7 @@ const getAShow = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while fetching a show!!"
+      "Something went wrong while fetching a show!!",
     );
   }
 });
@@ -258,7 +258,7 @@ const getShowByMovie = asyncHandler(async (req, res) => {
           const cleanedDates = theater.dates
             .map((dateObj) => {
               const futureTimes = dateObj.showtimes.filter(
-                (time) => time.time > now
+                (time) => time.time > now,
               );
 
               const plainDateObj = dateObj.toObject();
@@ -294,7 +294,7 @@ const getShowByMovie = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while fetching a show!!"
+      "Something went wrong while fetching a show!!",
     );
   }
 });
@@ -307,11 +307,11 @@ const getBookedSeats = asyncHandler(async (req, res) => {
     const show = await Showtime.findById(showtimeId);
 
     const theater = show.theaters.find(
-      (savedTheater) => savedTheater.theaterId.toString() === theaterId
+      (savedTheater) => savedTheater.theaterId.toString() === theaterId,
     );
 
     const dateBlock = theater.dates.find(
-      (savedDate) => savedDate.date === date
+      (savedDate) => savedDate.date === date,
     );
 
     const showtime = dateBlock.showtimes.find((savedTime) => {
@@ -321,7 +321,7 @@ const getBookedSeats = asyncHandler(async (req, res) => {
     if (!showtime)
       throw new ApiError(
         status.NOT_FOUND,
-        "Show for the theater/date/time not found!!"
+        "Show for the theater/date/time not found!!",
       );
 
     const bookedSeats = showtime.bookedSeats;
@@ -332,8 +332,8 @@ const getBookedSeats = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           bookedSeats,
-          "Booked seats fetched successfully!!"
-        )
+          "Booked seats fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`ERROR in booked seats fetching: ${error}`);
@@ -342,7 +342,7 @@ const getBookedSeats = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went worng while fetching booked seats!!"
+      "Something went worng while fetching booked seats!!",
     );
   }
 });

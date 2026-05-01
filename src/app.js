@@ -10,15 +10,21 @@ const app = express();
 app.use(
   "/api/stripe",
   express.raw({ type: "application/json" }),
-  stripeWebhooks
+  stripeWebhooks,
 );
 
 // middleware
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: function (origin, callback) {
+      if (!origin || AllowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-  })
+  }),
 );
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -33,6 +39,7 @@ import paymentRouter from "./routes/payment.routes.js";
 import movieRouter from "./routes/movie.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
 import authRouter from "./routes/auth.routes.js";
+import { AllowedOrigins } from "./constants.js";
 
 // Router uses
 app.use("/api/v1/users", userRouter);
@@ -43,11 +50,11 @@ app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/bookings", bookingRouter);
 
-// Global error handler
-app.use(globalErrorHandler);
-
 app.use("/", (req, res) => {
   res.send(`Tckify Server is running!!`);
 });
+
+// Global error handler
+app.use(globalErrorHandler);
 
 export default app;
