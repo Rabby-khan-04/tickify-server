@@ -38,14 +38,14 @@ const registerUser = asyncHandler(async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      throw new ApiError(
-        status.CONFLICT,
-        "Email already exists. Please use a different email!!",
-      );
+      return res
+        .status(status.OK)
+        .json(
+          new ApiResponce(status.OK, existingUser, "User already exists!!"),
+        );
     }
 
     const newUser = new User({ name, email, photo });
-
     const user = await newUser.save();
 
     return res
