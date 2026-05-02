@@ -41,6 +41,7 @@ import movieRouter from "./routes/movie.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import contactRouter from "./routes/contact.routes.js";
+import dashboardRouter from "./routes/dashboard.routes.js";
 
 // Router uses
 app.use("/api/v1/users", userRouter);
@@ -51,6 +52,7 @@ app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/bookings", bookingRouter);
 app.use("/api/v1/contact", contactRouter);
+app.use("/api/v1/dashboard", dashboardRouter);
 
 app.use("/", (req, res) => {
   res.send(`Tckify Server is running!!`);
