@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import globalErrorHandler from "./utils/globalErrorHandler.js";
 import stripeWebhooks from "./controllers/stripe.webhook.js";
+import { AllowedOrigins } from "./constants.js";
 
 const app = express();
 
@@ -39,7 +40,7 @@ import paymentRouter from "./routes/payment.routes.js";
 import movieRouter from "./routes/movie.routes.js";
 import bookingRouter from "./routes/booking.routes.js";
 import authRouter from "./routes/auth.routes.js";
-import { AllowedOrigins } from "./constants.js";
+import contactRouter from "./routes/contact.routes.js";
 
 // Router uses
 app.use("/api/v1/users", userRouter);
@@ -49,6 +50,7 @@ app.use("/api/v1/showtimes", showtimeRouter);
 app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/bookings", bookingRouter);
+app.use("/api/v1/contact", contactRouter);
 
 app.use("/", (req, res) => {
   res.send(`Tckify Server is running!!`);

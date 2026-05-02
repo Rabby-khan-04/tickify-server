@@ -13,7 +13,7 @@ const userSchema = new Schema(
       default: [],
     },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
 userSchema.methods.generateAccessToken = function () {
@@ -22,9 +22,11 @@ userSchema.methods.generateAccessToken = function () {
       _id: this._id,
       email: this.email,
       role: this.role,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
   );
 };
 
@@ -34,7 +36,7 @@ userSchema.methods.generateRefreshToken = function () {
       _id: this._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
   );
 };
 

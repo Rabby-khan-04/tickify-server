@@ -209,6 +209,65 @@ const getAUser = asyncHandler(async (req, res) => {
   }
 });
 
+const updateUser = asyncHandler(async (req, res) => {
+  try {
+    // Guard: middleware didn't attach user
+    if (!req.user?._id) {
+      throw new ApiError(status.UNAUTHORIZED, "Unauthorized!!");
+    }
+
+    const { name, email, photo } = req.body;
+
+    if (!name && !email && !photo) {
+      throw new ApiError(
+        status.BAD_REQUEST,
+        "At least one field is required to update!!",
+      );
+    }
+
+    const updateFields = {};
+    if (name) updateFields.name = name;
+    if (email) updateFields.email = email;
+    if (photo) updateFields.photo = photo;
+
+    if (email && email !== req.user.email) {
+      const emailExists = await User.findOne({
+        email,
+        _id: { $ne: req.user._id },
+      });
+      if (emailExists) {
+        throw new ApiError(
+          status.CONFLICT,
+          "Email already in use by another account!!",
+        );
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateFields },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedUser) {
+      throw new ApiError(status.NOT_FOUND, "User not found!!");
+    }
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(status.OK, updatedUser, "User updated successfully!!"),
+      );
+  } catch (error) {
+    console.log(`Update User ERROR: ${error}`);
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while updating the user!!",
+    );
+  }
+});
+
 const getAllUser = asyncHandler(async (req, res) => {
   try {
     const user = await User.find({})
@@ -341,6 +400,7 @@ const UserController = {
   addFavoriteMovies,
   removeMovieFromFavorites,
   getFavoriteMovies,
+  updateUser,
 };
 
 export default UserController;
