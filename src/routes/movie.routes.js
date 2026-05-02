@@ -20,6 +20,10 @@ router
     MovieController.getAllMovies,
   );
 
+router.route("/all").get(MovieController.getMovies);
+
+router.route("/filter-options").get(MovieController.getFilterOptions);
+
 router
   .route("/movies-count")
   .get(

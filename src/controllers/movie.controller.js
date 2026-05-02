@@ -230,8 +230,6 @@ const updateMovie = asyncHandler(async (req, res) => {
     const allowedFields = [
       "title",
       "overview",
-      "poster_path",
-      "backdrop_path",
       "genres",
       "casts",
       "release_date",
@@ -284,6 +282,149 @@ const updateMovie = asyncHandler(async (req, res) => {
   }
 });
 
+const getFilterOptions = asyncHandler(async (req, res) => {
+  try {
+    const result = await Movie.aggregate([
+      {
+        $facet: {
+          languages: [
+            {
+              $group: {
+                _id: null,
+                languages: { $addToSet: "$original_language" },
+              },
+            },
+          ],
+          genres: [
+            { $unwind: "$genres" },
+            {
+              $group: {
+                _id: "$genres.name",
+                genre: { $first: "$genres" },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                genres: { $addToSet: "$genre" },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const languages = result[0]?.languages[0]?.languages || [];
+    const genres = result[0]?.genres[0]?.genres || [];
+
+    return res
+      .status(status.OK)
+      .json(
+        new ApiResponce(
+          status.OK,
+          { languages, genres },
+          "Filter options fetched successfully!!",
+        ),
+      );
+  } catch (error) {
+    console.log(`ERROR while fetching filter options: ${error}`);
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching filter options!!",
+    );
+  }
+});
+
+const getMovies = asyncHandler(async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 8,
+      language,
+      genres,
+      sortBy,
+      order = "desc",
+      search,
+    } = req.query;
+
+    const query = {};
+
+    // 🔍 SEARCH (title)
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
+
+    // 🌐 FILTER: language
+    if (language) {
+      const languageArray = language.split(",");
+      query.original_language = { $in: languageArray };
+    }
+
+    // 🎭 FILTER: genres (array of objects)
+    if (genres) {
+      const genreArray = Array.isArray(genres) ? genres : genres.split(",");
+
+      query.genres = {
+        $elemMatch: {
+          name: { $in: genreArray },
+        },
+      };
+    }
+
+    // 📊 SORTING
+    let sortOption = {};
+
+    if (sortBy === "vote_average") {
+      sortOption.vote_average = order === "asc" ? 1 : -1;
+    }
+
+    if (sortBy === "release_date") {
+      sortOption.release_date = order === "asc" ? 1 : -1;
+    }
+
+    // 📄 PAGINATION
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const movies = await Movie.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(Number(limit))
+      .select("-casts");
+
+    const total = await Movie.countDocuments(query);
+
+    if (!movies.length) {
+      throw new ApiError(status.NOT_FOUND, "Movies not found");
+    }
+
+    return res.status(status.OK).json(
+      new ApiResponce(
+        status.OK,
+        {
+          movies,
+          pagination: {
+            total,
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: Math.ceil(total / limit),
+          },
+        },
+        "Movies fetched successfully",
+      ),
+    );
+  } catch (error) {
+    console.log(`ERROR in getMovies: ${error}`);
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Something went wrong while fetching movies",
+    );
+  }
+});
+
 const MovieController = {
   getNowPlayingMovies,
   getUpcomingMovies,
@@ -292,6 +433,8 @@ const MovieController = {
   getMovieDetails,
   getMovieById,
   updateMovie,
+  getFilterOptions,
+  getMovies,
 };
 
 export default MovieController;
