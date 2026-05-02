@@ -11,5 +11,11 @@ dashboardRouter.get(
   AuthMiddleware.verifyAdmin,
   DashboardController.getDashboardStats,
 );
+dashboardRouter.get(
+  "/charts",
+  AuthMiddleware.verifyJwt,
+  AuthMiddleware.verifyAdmin,
+  DashboardController.getDashboardCharts,
+);
 
 export default dashboardRouter;
