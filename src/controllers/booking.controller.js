@@ -20,25 +20,19 @@ const bookSeat = asyncHandler(async (req, res) => {
     if (!show)
       throw new ApiError(
         status.NOT_FOUND,
-        "Show not found for given theater/date/time!!"
+        "Show not found for given theater/date/time!!",
       );
 
     const theater = show.theaters.find(
-      (savedTheater) => savedTheater.theaterId.toString() === theaterId
+      (savedTheater) => savedTheater.theaterId.toString() === theaterId,
     );
 
     const dateBlock = theater?.dates.find(
-      (savedDate) => savedDate.date === date
+      (savedDate) => savedDate.date === date,
     );
 
     const showTime = dateBlock.showtimes.find((savedTime) => {
       const clientDate = new Date(`${date}T${time}:00+06:00`);
-
-      console.log("Saved time:", savedTime.time.toISOString());
-      console.log("Client time:", clientDate.toISOString());
-      console.log("Saved time UTC:", savedTime.time.getTime());
-      console.log("Client time UTC:", clientDate.getTime());
-      console.log("Match:", savedTime.time.getTime() === clientDate.getTime());
 
       return savedTime.time.getTime() === clientDate.getTime();
     });
@@ -46,13 +40,13 @@ const bookSeat = asyncHandler(async (req, res) => {
     if (!showTime)
       throw new ApiError(
         status.NOT_FOUND,
-        "Show not found for given theater/date/time!!"
+        "Show not found for given theater/date/time!!",
       );
 
     const alreadyBookedSeats = showTime.bookedSeats || [];
 
     const duplicateSeats = seats.filter((seat) =>
-      alreadyBookedSeats.includes(seat)
+      alreadyBookedSeats.includes(seat),
     );
 
     if (duplicateSeats.length > 0)
@@ -75,7 +69,7 @@ const bookSeat = asyncHandler(async (req, res) => {
           { "d.date": date },
           { "s.time": new Date(`${date}T${time}:00+06:00`) },
         ],
-      }
+      },
     );
 
     const servicecharge = theater.price * 0.06;
@@ -122,16 +116,13 @@ const bookSeat = asyncHandler(async (req, res) => {
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });
 
-    console.log(booking._id.toString());
-    console.log(session);
-
     booking.paymentLink = session.url;
     await booking.save({ validateBeforeSave: false });
 
     res
       .status(status.CREATED)
       .json(
-        new ApiResponce(status.CREATED, booking, "Seat booked successfully!!")
+        new ApiResponce(status.CREATED, booking, "Seat booked successfully!!"),
       );
   } catch (error) {
     console.log(`ERROR in book seat: ${error}`);
@@ -140,7 +131,7 @@ const bookSeat = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while booking a seat!!"
+      "Something went wrong while booking a seat!!",
     );
   }
 });
@@ -165,8 +156,8 @@ const getMyBookings = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           bookings,
-          "Bookings data fetched successfully!!"
-        )
+          "Bookings data fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`ERROR in fetching my bookings: ${error}`);
@@ -175,7 +166,7 @@ const getMyBookings = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while fetching my bookings!!"
+      "Something went wrong while fetching my bookings!!",
     );
   }
 });
@@ -194,8 +185,8 @@ const getBookingCount = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           bookingsCount,
-          "Bookings count fetched successfully!!"
-        )
+          "Bookings count fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`ERROR in fetching my bookings: ${error}`);
@@ -204,7 +195,7 @@ const getBookingCount = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while fetching my bookings!!"
+      "Something went wrong while fetching my bookings!!",
     );
   }
 });
@@ -221,8 +212,8 @@ const getSpecificBooking = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           booking,
-          "Booking data fetched successfully!!"
-        )
+          "Booking data fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`ERROR in sepecific booking data fetching: ${error}`);
@@ -231,7 +222,7 @@ const getSpecificBooking = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Something went wrong while fetching specifc booking!!"
+      "Something went wrong while fetching specifc booking!!",
     );
   }
 });
@@ -248,8 +239,8 @@ const getBookingForShowtime = asyncHandler(async (req, res) => {
         new ApiResponce(
           status.OK,
           bookings,
-          "Booking for a showtime fetched successfully!!"
-        )
+          "Booking for a showtime fetched successfully!!",
+        ),
       );
   } catch (error) {
     console.log(`ERROR in fetching booking for showtime: ${error}`);
@@ -258,7 +249,7 @@ const getBookingForShowtime = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Somethign went wrong while fetching bookings for a showtime!!"
+      "Somethign went wrong while fetching bookings for a showtime!!",
     );
   }
 });
@@ -270,7 +261,7 @@ const getAllbookings = asyncHandler(async (req, res) => {
     return res
       .status(status.OK)
       .json(
-        new ApiResponce(status.OK, bookings, "Bookings fetched successfully!!")
+        new ApiResponce(status.OK, bookings, "Bookings fetched successfully!!"),
       );
   } catch (error) {
     console.log(`ERROR in fetching bookings: ${error}`);
@@ -279,7 +270,7 @@ const getAllbookings = asyncHandler(async (req, res) => {
 
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      "Somethign went wrong while fetching bookings!!"
+      "Somethign went wrong while fetching bookings!!",
     );
   }
 });
@@ -294,13 +285,3 @@ const BookingController = {
 };
 
 export default BookingController;
-
-// switch (event.type) {
-//   case 'payment_intent.succeeded':
-//     const paymentIntentSucceeded = event.data.object;
-//     // Then define and call a function to handle the event payment_intent.succeeded
-//     break;
-//   // ... handle other event types
-//   default:
-//     console.log(`Unhandled event type ${event.type}`);
-// }

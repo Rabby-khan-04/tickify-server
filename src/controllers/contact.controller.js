@@ -8,8 +8,6 @@ const submitContact = asyncHandler(async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    console.log({ name, email, subject, message });
-
     if (!name || !email) {
       throw new ApiError(
         status.BAD_REQUEST,
